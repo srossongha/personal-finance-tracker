@@ -1,72 +1,99 @@
 "use client";
 
-import { useState, type SubmitEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useCategoryBudgets } from "@/lib/hooks";
+import { useToast } from "../components/toast";
+
+const DEFAULT_CATEGORIES = [
+  "Food & Dining",
+  "Transportation",
+  "Housing & Utilities",
+  "Entertainment",
+  "Shopping",
+  "Health & Wellness",
+  "Other",
+];
 
 const Inputs = () => {
   const router = useRouter();
+  const toast = useToast();
 
-  // Categories used to come from a hardcoded mockCategoryBudgets array.
-  // Now they're per-user rows in the category_budget table, fetched
-  // through the same shared hook the Budgets and Topbar components use.
   const { data: categoryBudgets } = useCategoryBudgets();
 
+  const availableCategories =
+    categoryBudgets.length > 0
+      ? categoryBudgets.map((b) => b.category)
+      : DEFAULT_CATEGORIES;
+
   const [description, setDescription] = useState("");
-  // "" means "no explicit choice yet" — falls back to the first fetched
-  // category below. Derived at render time rather than synced via a
-  // separate effect, so there's no extra render just to catch up.
   const [category, setCategory] = useState("");
-  const selectedCategory = category || categoryBudgets[0]?.category || "";
+  const selectedCategory = category || availableCategories[0] || "Other";
   const [type, setType] = useState<"income" | "expense">("expense");
   const [amount, setAmount] = useState("");
-  // Defaults to today, but is now a real editable field like every other
-  // column on the Transaction table — not silently hardcoded anymore.
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: SubmitEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
     const parsedAmount = Number(amount);
-    const isValid =
-      description.trim() &&
-      selectedCategory.trim() &&
-      date.trim() &&
-      Number.isFinite(parsedAmount) &&
-      parsedAmount > 0;
+    if (!description.trim()) {
+      setError("Please provide a description.");
+      return;
+    }
 
-    if (!isValid) return; // simple guard, no error UI yet
+    if (!selectedCategory.trim()) {
+      setError("Please choose a category.");
+      return;
+    }
+
+    if (!date.trim()) {
+      setError("Please pick a date.");
+      return;
+    }
+
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      setError("Please enter a valid amount greater than 0.");
+      return;
+    }
 
     setIsSubmitting(true);
 
-    const response = await fetch("/api/transactions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        description,
-        category: selectedCategory,
-        type,
-        amount: parsedAmount,
-        date,
-      }),
-    });
+    try {
+      const response = await fetch("/api/transactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          description: description.trim(),
+          category: selectedCategory,
+          type,
+          amount: parsedAmount,
+          date,
+        }),
+      });
 
-    setIsSubmitting(false);
+      if (response.status === 401) {
+        router.push("/login");
+        return;
+      }
 
-    if (response.status === 401) {
-      router.push("/login");
-      return;
+      if (!response.ok) {
+        throw new Error("Couldn't save that transaction. Please try again.");
+      }
+
+      toast.success("Transaction added successfully!");
+      router.push("/transactions");
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : "Couldn't save that transaction.";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    if (!response.ok) {
-      setError("Couldn't save that transaction. Try again.");
-      return;
-    }
-
-    router.push("/transactions");
   };
 
   return (
@@ -79,43 +106,60 @@ const Inputs = () => {
           Add transaction
         </h1>
 
-        <input
-          type="text"
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-(--brand-500)"
-        />
+        <label className="flex flex-col gap-1 text-xs font-medium text-(--ink-secondary)">
+          Description
+          <input
+            type="text"
+            required
+            placeholder="e.g. Grocery shopping"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm text-(--ink-primary) outline-none focus:ring-2 focus:ring-(--brand-500)"
+          />
+        </label>
 
-        <select
-          value={selectedCategory}
-          onChange={(e) => setCategory(e.target.value)}
-          className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-(--brand-500)"
-        >
-          {categoryBudgets.map(({ category: name }) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </select>
+        <label className="flex flex-col gap-1 text-xs font-medium text-(--ink-secondary)">
+          Category
+          <select
+            value={selectedCategory}
+            onChange={(e) => setCategory(e.target.value)}
+            className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm text-(--ink-primary) outline-none focus:ring-2 focus:ring-(--brand-500)"
+          >
+            {availableCategories.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </label>
 
-        <input
-          type="number"
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-(--brand-500)"
-        />
+        <label className="flex flex-col gap-1 text-xs font-medium text-(--ink-secondary)">
+          Amount
+          <input
+            type="number"
+            step="any"
+            min="0.01"
+            required
+            placeholder="0.00"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm text-(--ink-primary) outline-none focus:ring-2 focus:ring-(--brand-500)"
+          />
+        </label>
 
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-(--brand-500)"
-        />
+        <label className="flex flex-col gap-1 text-xs font-medium text-(--ink-secondary)">
+          Date
+          <input
+            type="date"
+            required
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm text-(--ink-primary) outline-none focus:ring-2 focus:ring-(--brand-500)"
+          />
+        </label>
 
-        <div className="flex gap-4 text-sm">
-          <label className="flex items-center gap-1.5">
+        <div className="flex gap-4 pt-1 text-sm text-(--ink-primary)">
+          <label className="flex items-center gap-1.5 cursor-pointer">
             <input
               type="radio"
               checked={type === "expense"}
@@ -124,7 +168,7 @@ const Inputs = () => {
             />
             Expense
           </label>
-          <label className="flex items-center gap-1.5">
+          <label className="flex items-center gap-1.5 cursor-pointer">
             <input
               type="radio"
               checked={type === "income"}
@@ -135,14 +179,18 @@ const Inputs = () => {
           </label>
         </div>
 
-        {error && <p className="text-sm text-(--status-critical)">{error}</p>}
+        {error && (
+          <p className="rounded-lg bg-(--status-critical)/10 p-2.5 text-xs text-(--status-critical)">
+            {error}
+          </p>
+        )}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-2 rounded-md bg-(--brand-600) px-3 py-2 text-sm font-medium text-white hover:bg-(--brand-700) disabled:opacity-50"
+          className="mt-2 inline-flex items-center justify-center rounded-xl bg-(--brand-600) px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-(--brand-700) disabled:opacity-50 active:scale-[0.98] cursor-pointer"
         >
-          {isSubmitting ? "Saving..." : "Save transaction"}
+          {isSubmitting ? "Saving transaction..." : "Save transaction"}
         </button>
       </form>
     </div>

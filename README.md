@@ -187,6 +187,8 @@ pnpm exec prisma studio
 ```bash
 pnpm dev
 ```
+testing just do wahagt i awnt
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 The application will start on **[http://localhost:3100](http://localhost:3100)** with Turbopack enabled.
 

@@ -97,14 +97,45 @@ const Inputs = () => {
   };
 
   return (
-    <div className="flex min-h-full items-start justify-center bg-(--surface-muted) p-6">
+    <div className="flex min-h-full items-start justify-center bg-(--surface-muted) p-4 sm:p-6">
       <form
         onSubmit={handleSubmit}
-        className="flex w-full max-w-sm flex-col gap-3 rounded-2xl border border-(--chart-grid) bg-(--surface-card) p-6 shadow-sm"
+        className="flex w-full max-w-md flex-col gap-4 rounded-2xl border border-(--chart-grid) bg-(--surface-card) p-5 sm:p-6 shadow-sm"
       >
-        <h1 className="mb-2 text-2xl font-semibold text-(--ink-primary)">
-          Add transaction
-        </h1>
+        <div>
+          <h1 className="text-xl sm:text-2xl font-semibold text-(--ink-primary)">
+            Add transaction
+          </h1>
+          <p className="text-xs text-(--ink-muted) mt-0.5">
+            Record a new expense or income entry
+          </p>
+        </div>
+
+        {/* Mobile-Friendly Segmented Toggle */}
+        <div className="flex rounded-xl bg-(--surface-muted) p-1 gap-1">
+          <button
+            type="button"
+            onClick={() => setType("expense")}
+            className={`flex-1 py-2 text-center text-xs sm:text-sm font-semibold rounded-lg transition-all active:scale-95 cursor-pointer ${
+              type === "expense"
+                ? "bg-(--status-critical) text-white shadow-xs"
+                : "text-(--ink-secondary) hover:text-(--ink-primary)"
+            }`}
+          >
+            Expense
+          </button>
+          <button
+            type="button"
+            onClick={() => setType("income")}
+            className={`flex-1 py-2 text-center text-xs sm:text-sm font-semibold rounded-lg transition-all active:scale-95 cursor-pointer ${
+              type === "income"
+                ? "bg-(--status-good) text-white shadow-xs"
+                : "text-(--ink-secondary) hover:text-(--ink-primary)"
+            }`}
+          >
+            Income
+          </button>
+        </div>
 
         <label className="flex flex-col gap-1 text-xs font-medium text-(--ink-secondary)">
           Description
@@ -114,7 +145,7 @@ const Inputs = () => {
             placeholder="e.g. Grocery shopping"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm text-(--ink-primary) outline-none focus:ring-2 focus:ring-(--brand-500)"
+            className="h-11 rounded-xl border border-(--chart-grid) px-3 text-base sm:text-sm text-(--ink-primary) outline-none focus:ring-2 focus:ring-(--brand-500)"
           />
         </label>
 
@@ -123,7 +154,7 @@ const Inputs = () => {
           <select
             value={selectedCategory}
             onChange={(e) => setCategory(e.target.value)}
-            className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm text-(--ink-primary) outline-none focus:ring-2 focus:ring-(--brand-500)"
+            className="h-11 rounded-xl border border-(--chart-grid) px-3 text-base sm:text-sm text-(--ink-primary) outline-none focus:ring-2 focus:ring-(--brand-500) bg-transparent"
           >
             {availableCategories.map((name) => (
               <option key={name} value={name}>
@@ -139,11 +170,12 @@ const Inputs = () => {
             type="number"
             step="any"
             min="0.01"
+            inputMode="decimal"
             required
             placeholder="0.00"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm text-(--ink-primary) outline-none focus:ring-2 focus:ring-(--brand-500)"
+            className="h-11 rounded-xl border border-(--chart-grid) px-3 text-base sm:text-sm text-(--ink-primary) outline-none focus:ring-2 focus:ring-(--brand-500)"
           />
         </label>
 
@@ -154,33 +186,12 @@ const Inputs = () => {
             required
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="rounded-md border border-(--chart-grid) px-3 py-2 text-sm text-(--ink-primary) outline-none focus:ring-2 focus:ring-(--brand-500)"
+            className="h-11 rounded-xl border border-(--chart-grid) px-3 text-base sm:text-sm text-(--ink-primary) outline-none focus:ring-2 focus:ring-(--brand-500)"
           />
         </label>
 
-        <div className="flex gap-4 pt-1 text-sm text-(--ink-primary)">
-          <label className="flex items-center gap-1.5 cursor-pointer">
-            <input
-              type="radio"
-              checked={type === "expense"}
-              onChange={() => setType("expense")}
-              className="accent-(--brand-600)"
-            />
-            Expense
-          </label>
-          <label className="flex items-center gap-1.5 cursor-pointer">
-            <input
-              type="radio"
-              checked={type === "income"}
-              onChange={() => setType("income")}
-              className="accent-(--brand-600)"
-            />
-            Income
-          </label>
-        </div>
-
         {error && (
-          <p className="rounded-lg bg-(--status-critical)/10 p-2.5 text-xs text-(--status-critical)">
+          <p className="rounded-xl bg-(--status-critical)/10 p-3 text-xs text-(--status-critical)">
             {error}
           </p>
         )}
@@ -188,7 +199,7 @@ const Inputs = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-2 inline-flex items-center justify-center rounded-xl bg-(--brand-600) px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-(--brand-700) disabled:opacity-50 active:scale-[0.98] cursor-pointer"
+          className="mt-1 inline-flex h-12 items-center justify-center rounded-xl bg-(--brand-600) px-4 text-sm font-semibold text-white shadow-sm transition-all hover:bg-(--brand-700) disabled:opacity-50 active:scale-[0.98] cursor-pointer"
         >
           {isSubmitting ? "Saving transaction..." : "Save transaction"}
         </button>

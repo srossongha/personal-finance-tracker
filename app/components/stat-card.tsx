@@ -38,7 +38,7 @@ export function StatCard({
 
   return (
     <div
-      className="flex flex-col justify-between rounded-2xl p-5 text-white shadow-sm"
+      className="flex flex-col justify-between rounded-2xl p-4 sm:p-5 text-white shadow-sm"
       style={{ background: accent }}
     >
       <div className="flex items-start justify-between gap-2">

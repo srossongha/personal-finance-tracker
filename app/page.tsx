@@ -26,7 +26,7 @@ const RANGE_OPTIONS = [
 
 type RangeKey = (typeof RANGE_OPTIONS)[number]["key"];
 
-const cardClass = "rounded-2xl border border-(--chart-grid) bg-(--surface-card) p-5";
+const cardClass = "rounded-2xl border border-(--chart-grid) bg-(--surface-card) p-4 sm:p-5";
 
 export default function Dashboard() {
   const { data: transactions, isLoading, refetch } = useTransactions();
@@ -77,9 +77,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex flex-col gap-5 p-6">
+    <div className="flex flex-col gap-4 sm:gap-5 p-4 sm:p-6">
       {!isLoading && transactions.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-(--brand-500)/40 bg-(--surface-muted) px-5 py-4 text-sm text-(--ink-secondary)">
+        <div className="rounded-2xl border border-dashed border-(--brand-500)/40 bg-(--surface-muted) px-4 py-3 sm:px-5 sm:py-4 text-xs sm:text-sm text-(--ink-secondary)">
           You haven&apos;t logged any transactions yet.{" "}
           <Link href="/inputs" className="font-semibold text-(--brand-600) underline">
             Add your first one
@@ -89,7 +89,7 @@ export default function Dashboard() {
       )}
 
       {/* --- Stat tiles -------------------------------------------------- */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Total balance"
           value={formatCurrency(metrics.totalBalance)}
@@ -130,17 +130,17 @@ export default function Dashboard() {
       {/* --- Wallet analytics + category breakdown ------------------------ */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className={`${cardClass} xl:col-span-2`}>
-          <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="font-semibold text-(--ink-primary)">Wallet analytics</p>
               <p className="text-xs text-(--ink-muted)">Running balance from every recorded transaction</p>
             </div>
-            <div className="flex gap-1 rounded-full bg-(--surface-muted) p-1 text-xs font-medium">
+            <div className="flex max-w-full gap-1 overflow-x-auto rounded-full bg-(--surface-muted) p-1 text-xs font-medium">
               {RANGE_OPTIONS.map((option) => (
                 <button
                   key={option.key}
                   onClick={() => setRange(option.key)}
-                  className={`rounded-full px-3 py-1 transition-colors ${
+                  className={`rounded-full px-2.5 py-1 shrink-0 transition-colors ${
                     range === option.key
                       ? "bg-(--brand-600) text-white"
                       : "text-(--ink-secondary) hover:bg-(--chart-grid)"
@@ -211,14 +211,69 @@ export default function Dashboard() {
             </div>
             <Link
               href="/inputs"
-              className="flex items-center gap-1.5 rounded-full bg-(--brand-600) px-3 py-1.5 text-xs font-semibold text-white hover:bg-(--brand-700)"
+              className="flex items-center gap-1.5 rounded-full bg-(--brand-600) px-3 py-1.5 text-xs font-semibold text-white hover:bg-(--brand-700) active:scale-95"
             >
               <AddIcon size={14} />
               Add
             </Link>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Mobile Card List View (< sm:) */}
+          <div className="flex flex-col divide-y divide-(--chart-grid) sm:hidden">
+            {recentTransactions.length === 0 && (
+              <p className="py-4 text-center text-sm text-(--ink-muted)">
+                No transactions yet.
+              </p>
+            )}
+            {recentTransactions.map((t) => (
+              <div key={t.id} className="flex items-center justify-between py-2.5">
+                <div className="min-w-0 flex-1 pr-2">
+                  <p className="truncate text-sm font-medium text-(--ink-primary)">
+                    {t.description}
+                  </p>
+                  <div className="mt-0.5 flex items-center gap-1.5 text-xs text-(--ink-muted)">
+                    <span className="truncate">{t.category}</span>
+                    <span>•</span>
+                    <span className="shrink-0">{relativeTime(t.date)}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="text-right">
+                    <p
+                      className={`text-sm font-semibold ${
+                        t.type === "income"
+                          ? "text-(--status-good)"
+                          : "text-(--status-critical)"
+                      }`}
+                    >
+                      {t.type === "income" ? "+" : "-"}
+                      {formatCurrency(t.amount)}
+                    </p>
+                    <span
+                      className={`inline-block rounded-full px-2 py-0.2 text-[10px] font-semibold ${
+                        t.type === "income"
+                          ? "bg-(--status-good)/15 text-(--status-good)"
+                          : "bg-(--status-critical)/15 text-(--status-critical)"
+                      }`}
+                    >
+                      {t.type === "income" ? "Income" : "Expense"}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handleDelete(t.id)}
+                    disabled={deletingId === t.id}
+                    aria-label={`Delete ${t.description}`}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg p-1.5 text-(--ink-muted) transition-colors hover:bg-(--status-critical)/10 hover:text-(--status-critical) active:scale-95 disabled:opacity-50"
+                  >
+                    <TrashIcon size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Tablet & Desktop Table View (sm:) */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="text-xs text-(--ink-muted)">

@@ -46,10 +46,10 @@ const ReportsPage = () => {
   const maxMagnitude = Math.max(...summaries.map((s) => Math.max(s.income, s.expense)), 1);
 
   return (
-    <div className="flex flex-col gap-4 p-6">
+    <div className="flex flex-col gap-4 p-4 sm:p-6">
       <div>
-        <h1 className="text-2xl font-semibold text-(--ink-primary)">Reports</h1>
-        <p className="text-sm text-(--ink-muted)">Income, expenses, and net by month</p>
+        <h1 className="text-xl sm:text-2xl font-semibold text-(--ink-primary)">Reports</h1>
+        <p className="text-xs sm:text-sm text-(--ink-muted)">Income, expenses, and net by month</p>
       </div>
 
       {isLoading && <p className="text-sm text-(--ink-muted)">Loading…</p>}
@@ -62,7 +62,55 @@ const ReportsPage = () => {
 
       {summaries.length > 0 && (
         <div className="overflow-hidden rounded-2xl border border-(--chart-grid) bg-(--surface-card)">
-          <div className="overflow-x-auto">
+          {/* Mobile Monthly Summary Cards (< sm:) */}
+          <div className="flex flex-col divide-y divide-(--chart-grid) sm:hidden">
+            {summaries.map((s) => (
+              <div key={s.key} className="flex flex-col gap-3 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-sm text-(--ink-primary)">
+                    {s.label}
+                  </span>
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                      s.net >= 0
+                        ? "bg-(--status-good)/15 text-(--status-good)"
+                        : "bg-(--status-critical)/15 text-(--status-critical)"
+                    }`}
+                  >
+                    Net: {formatCurrency(s.net)}
+                  </span>
+                </div>
+
+                {/* Progress bar comparison */}
+                <div className="flex flex-col gap-1.5 rounded-xl bg-(--surface-muted) p-2.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-(--status-good) font-medium">Income</span>
+                    <span className="font-semibold text-(--status-good)">+{formatCurrency(s.income)}</span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-(--chart-grid)">
+                    <div
+                      className="h-full rounded-full bg-(--status-good)"
+                      style={{ width: `${(s.income / maxMagnitude) * 100}%` }}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs mt-1">
+                    <span className="text-(--status-critical) font-medium">Expense</span>
+                    <span className="font-semibold text-(--status-critical)">-{formatCurrency(s.expense)}</span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-(--chart-grid)">
+                    <div
+                      className="h-full rounded-full bg-(--status-critical)"
+                      style={{ width: `${(s.expense / maxMagnitude) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View (sm:) */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-(--chart-grid) text-xs text-(--ink-muted)">

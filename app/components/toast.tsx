@@ -306,7 +306,7 @@ function ToastContainer({
     <div
       aria-live="polite"
       aria-atomic="true"
-      className="pointer-events-none fixed top-4 right-4 z-50 flex w-full max-w-sm flex-col gap-2.5 px-4 sm:px-0"
+      className="pointer-events-none fixed top-3 sm:top-4 left-0 right-0 sm:left-auto sm:right-4 z-50 flex w-full sm:max-w-sm flex-col items-center sm:items-end gap-2.5 px-3 sm:px-0"
     >
       {toasts.map((toast) => {
         const style = typeStyles[toast.type];

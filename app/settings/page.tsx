@@ -45,24 +45,24 @@ const Settings = () => {
   });
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <h1 className="text-2xl font-semibold text-(--ink-primary)">Settings</h1>
+    <div className="flex flex-col gap-4 p-4 sm:p-6">
+      <h1 className="text-xl sm:text-2xl font-semibold text-(--ink-primary)">Settings</h1>
 
-      <div className="max-w-xl rounded-2xl border border-(--chart-grid) bg-(--surface-card) p-6">
-        <div className="flex items-center gap-4">
+      <div className="w-full max-w-xl rounded-2xl border border-(--chart-grid) bg-(--surface-card) p-5 sm:p-6">
+        <div className="flex items-center gap-3 sm:gap-4">
           <span
-            className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-semibold text-white"
+            className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-full text-lg sm:text-xl font-semibold text-white shadow-xs"
             style={{ background: "var(--brand-gradient)" }}
           >
             {initialsFor(session.user.name)}
           </span>
-          <div>
-            <p className="text-lg font-semibold text-(--ink-primary)">{session.user.name}</p>
-            <p className="text-sm text-(--ink-muted)">{session.user.email}</p>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-base sm:text-lg font-semibold text-(--ink-primary)">{session.user.name}</p>
+            <p className="truncate text-xs sm:text-sm text-(--ink-muted)">{session.user.email}</p>
           </div>
         </div>
 
-        <dl className="mt-6 grid grid-cols-2 gap-4 border-t border-(--chart-grid) pt-4 text-sm">
+        <dl className="mt-5 sm:mt-6 grid grid-cols-2 gap-3 sm:gap-4 border-t border-(--chart-grid) pt-4 text-xs sm:text-sm">
           <div>
             <dt className="text-(--ink-muted)">Member since</dt>
             <dd className="mt-0.5 font-medium text-(--ink-primary)">{memberSince}</dd>
@@ -77,7 +77,7 @@ const Settings = () => {
 
         <button
           onClick={handleLogout}
-          className="mt-6 flex items-center gap-2 rounded-md bg-(--status-critical) px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+          className="mt-6 flex h-11 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-(--status-critical) px-5 text-sm font-semibold text-white shadow-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer"
         >
           <LogoutIcon size={16} />
           Log out

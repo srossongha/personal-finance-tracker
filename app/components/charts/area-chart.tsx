@@ -88,19 +88,27 @@ export function AreaChart({
     setHoverIndex(Math.min(data.length - 1, Math.max(0, index)));
   };
 
-  // Show at most ~6 x-axis labels — labeling every point is unreadable
+  // Show at most ~4-6 x-axis labels — labeling every point is unreadable
   // once there are more than a handful of days.
-  const labelStride = Math.max(1, Math.ceil(data.length / 6));
+  const labelStride = Math.max(1, Math.ceil(data.length / 5));
 
   const hovered = hoverIndex !== null ? points[hoverIndex] : null;
   const hoveredDatum = hoverIndex !== null ? data[hoverIndex] : null;
+
+  // Clamp tooltip horizontal position so it doesn't clip off-screen on mobile
+  const tooltipXPercent = hovered ? (hovered.x / VIEW_WIDTH) * 100 : 50;
+  const tooltipTranslateX =
+    tooltipXPercent < 18 ? "0%" : tooltipXPercent > 82 ? "-100%" : "-50%";
 
   return (
     <div
       ref={containerRef}
       className="relative w-full select-none"
+      style={{ touchAction: "pan-y" }}
+      onPointerDown={handlePointerMove}
       onPointerMove={handlePointerMove}
       onPointerLeave={() => setHoverIndex(null)}
+      onPointerCancel={() => setHoverIndex(null)}
     >
       <svg
         viewBox={`0 0 ${VIEW_WIDTH} ${height}`}
@@ -185,10 +193,11 @@ export function AreaChart({
 
       {hovered && hoveredDatum && (
         <div
-          className="pointer-events-none absolute -translate-x-1/2 -translate-y-[calc(100%+10px)] rounded-lg px-3 py-1.5 text-xs whitespace-nowrap text-white shadow-lg"
+          className="pointer-events-none absolute -translate-y-[calc(100%+10px)] rounded-lg px-3 py-1.5 text-xs whitespace-nowrap text-white shadow-lg"
           style={{
-            left: `${(hovered.x / VIEW_WIDTH) * 100}%`,
+            left: `${tooltipXPercent}%`,
             top: `${(hovered.y / height) * 100}%`,
+            transform: `translate(${tooltipTranslateX}, calc(-100% - 10px))`,
             background: color,
           }}
         >

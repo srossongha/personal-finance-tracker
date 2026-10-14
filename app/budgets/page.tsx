@@ -62,31 +62,32 @@ const Budgets = () => {
   const maxCategorySpend = Math.max(...categorySpend.map((c) => c.amount), 1);
 
   return (
-    <div className="p-6">
-      <h1 className="mb-4 text-2xl font-semibold text-(--ink-primary)">
+    <div className="flex flex-col gap-4 p-4 sm:p-6">
+      <h1 className="text-xl sm:text-2xl font-semibold text-(--ink-primary)">
         Budgets
       </h1>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
-        {/* 1: overall monthly limit — spans 2 columns */}
-        <div className="col-span-1 rounded-2xl border border-(--chart-grid) bg-(--surface-card) p-4 sm:col-span-2">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-6">
+        {/* 1: overall monthly limit — spans full width on mobile/tablet */}
+        <div className="col-span-2 rounded-2xl border border-(--chart-grid) bg-(--surface-card) p-4 sm:p-5">
           <div className="mb-2 flex items-center justify-between">
-            <p className="text-sm font-medium text-(--ink-muted)">
+            <p className="text-xs sm:text-sm font-medium text-(--ink-muted)">
               Monthly spend
             </p>
             {isEditing ? (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 <input
                   type="number"
+                  inputMode="decimal"
                   autoFocus
                   value={draftLimit}
                   onChange={(e) => setDraftLimit(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSave()}
-                  className="w-16 rounded-md border border-(--chart-grid) px-1 py-0.5 text-right text-xs"
+                  className="w-24 rounded-lg border border-(--chart-grid) px-2 py-1 text-right text-xs sm:text-sm outline-none focus:ring-1 focus:ring-(--brand-500)"
                 />
                 <button
                   onClick={handleSave}
-                  className="rounded-md bg-(--brand-600) px-2 py-0.5 text-xs font-medium text-white hover:bg-(--brand-700)"
+                  className="rounded-lg bg-(--brand-600) px-3 py-1 text-xs font-semibold text-white hover:bg-(--brand-700) active:scale-95"
                 >
                   Save
                 </button>
@@ -97,21 +98,21 @@ const Budgets = () => {
                   setDraftLimit(String(limit));
                   setIsEditing(true);
                 }}
-                className="text-xs font-medium text-(--ink-muted) underline decoration-dotted underline-offset-4"
+                className="text-xs font-medium text-(--brand-600) hover:underline cursor-pointer"
               >
-                Edit
+                Edit limit
               </button>
             )}
           </div>
-          <p className="text-2xl font-semibold text-(--ink-primary)">
+          <p className="text-xl sm:text-2xl font-semibold text-(--ink-primary)">
             {formatCurrency(spent)}{" "}
-            <span className="text-sm font-normal text-(--ink-muted)">
+            <span className="text-xs sm:text-sm font-normal text-(--ink-muted)">
               / {formatCurrency(limit)}
             </span>
           </p>
           <p
             className={`mt-1 text-xs ${
-              isOverBudget ? "text-(--status-critical)" : "text-(--ink-muted)"
+              isOverBudget ? "text-(--status-critical) font-medium" : "text-(--ink-muted)"
             }`}
           >
             {isOverBudget
@@ -120,24 +121,24 @@ const Budgets = () => {
           </p>
         </div>
 
-        {/* 2, 6, 3, 7: per-category mini cards — one grid cell each */}
+        {/* 2, 6, 3, 7: per-category mini cards — 2 per row on mobile */}
         {categoryBudgets.map(({ category, limit: categoryLimit }) => {
           const categorySpent = spentOnCategory(transactions, category);
           const over = categorySpent > categoryLimit;
           return (
             <div
               key={category}
-              className="rounded-2xl border border-(--chart-grid) bg-(--surface-card) p-4"
+              className="col-span-1 rounded-2xl border border-(--chart-grid) bg-(--surface-card) p-3.5 sm:p-4"
             >
-              <p className="text-sm font-medium text-(--ink-muted)">
+              <p className="truncate text-xs sm:text-sm font-medium text-(--ink-muted)">
                 {category}
               </p>
-              <p className="mt-1 text-lg font-semibold text-(--ink-primary)">
+              <p className="mt-1 text-base sm:text-lg font-semibold text-(--ink-primary)">
                 {formatCurrency(categorySpent)}
               </p>
               <p
-                className={`text-xs ${
-                  over ? "text-(--status-critical)" : "text-(--ink-muted)"
+                className={`text-[11px] sm:text-xs mt-0.5 ${
+                  over ? "text-(--status-critical) font-medium" : "text-(--ink-muted)"
                 }`}
               >
                 of {formatCurrency(categoryLimit)}
@@ -146,9 +147,9 @@ const Budgets = () => {
           );
         })}
 
-        {/* 4: analytics — spans 4 columns, 2 rows */}
-        <div className="col-span-1 rounded-2xl border border-(--chart-grid) bg-(--surface-card) p-4 sm:col-span-2 lg:col-span-4 lg:row-span-2">
-          <p className="mb-3 text-sm font-medium text-(--ink-muted)">
+        {/* 4: analytics — spans full width on mobile, 4 columns on desktop */}
+        <div className="col-span-2 rounded-2xl border border-(--chart-grid) bg-(--surface-card) p-4 sm:p-5 lg:col-span-4 lg:row-span-2">
+          <p className="mb-3 text-sm font-semibold text-(--ink-primary)">
             Spend by category
           </p>
           <div className="flex flex-col gap-3">
@@ -158,8 +159,8 @@ const Budgets = () => {
               </p>
             )}
             {categorySpend.map(({ category, amount }) => (
-              <div key={category} className="flex items-center gap-3">
-                <p className="w-24 shrink-0 text-sm text-(--ink-secondary)">
+              <div key={category} className="flex items-center gap-2 sm:gap-3">
+                <p className="w-20 sm:w-28 shrink-0 truncate text-xs sm:text-sm text-(--ink-secondary)">
                   {category}
                 </p>
                 <div className="h-2 flex-1 overflow-hidden rounded-full bg-(--surface-muted)">
@@ -168,7 +169,7 @@ const Budgets = () => {
                     style={{ width: `${(amount / maxCategorySpend) * 100}%` }}
                   />
                 </div>
-                <p className="w-20 shrink-0 text-right text-sm text-(--ink-primary)">
+                <p className="w-16 sm:w-20 shrink-0 text-right text-xs sm:text-sm font-medium text-(--ink-primary)">
                   {formatCurrency(amount)}
                 </p>
               </div>
@@ -176,9 +177,9 @@ const Budgets = () => {
           </div>
         </div>
 
-        {/* 5: in/out — spans 2 columns, 2 rows */}
-        <div className="col-span-1 rounded-2xl border border-(--chart-grid) bg-(--surface-card) p-4 sm:col-span-2 lg:row-span-2">
-          <p className="mb-3 text-sm font-medium text-(--ink-muted)">
+        {/* 5: in/out — spans full width on mobile, 2 columns on desktop */}
+        <div className="col-span-2 rounded-2xl border border-(--chart-grid) bg-(--surface-card) p-4 sm:p-5 lg:row-span-2">
+          <p className="mb-3 text-sm font-semibold text-(--ink-primary)">
             In / Out
           </p>
           <div className="flex flex-col gap-4">

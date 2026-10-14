@@ -24,10 +24,10 @@ const FAQ = [
 
 const HelpPage = () => {
   return (
-    <div className="flex flex-col gap-4 p-6">
+    <div className="flex flex-col gap-4 p-4 sm:p-6">
       <div>
-        <h1 className="text-2xl font-semibold text-(--ink-primary)">Help & support</h1>
-        <p className="text-sm text-(--ink-muted)">Answers to a few common questions.</p>
+        <h1 className="text-xl sm:text-2xl font-semibold text-(--ink-primary)">Help & support</h1>
+        <p className="text-xs sm:text-sm text-(--ink-muted)">Answers to a few common questions.</p>
       </div>
 
       <div className="flex max-w-2xl flex-col gap-3">

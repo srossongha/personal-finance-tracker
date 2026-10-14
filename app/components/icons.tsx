@@ -267,3 +267,18 @@ export function TrendDownIcon({ size = 14, className }: IconProps) {
     </svg>
   );
 }
+
+export function XIcon({ size = 20, className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      className={className}
+      {...base}
+    >
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  );
+}
+
